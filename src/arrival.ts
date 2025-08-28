@@ -30,8 +30,8 @@ export type SortField = 'time' | 'encore';
 export type SectionDelimiterReprOptions = {
     sortOrder: SortOrder;
     sortField: SortField;
-    isFolded: boolean;
-    unpinFoldThreshold: number;
+    hideHistory: boolean;
+    unpinHideThreshold: number;
 }
 
 export class SectionDelimiter implements TreeItemInterface {
@@ -43,13 +43,13 @@ export class SectionDelimiter implements TreeItemInterface {
         reprOptions: SectionDelimiterReprOptions
     ) {
         const orderIcon = reprOptions.sortOrder === 'ascending' ? '↑' : '↓';
-        const foldStatus = reprOptions.isFolded ? `${reprOptions.unpinFoldThreshold}` : 'all';
+        const hideHistoryStatus = reprOptions.hideHistory ? `${reprOptions.unpinHideThreshold}` : 'all';
         const delimiterInfo: string[] = [
             ...(pinnedCount > 0 ? [`↑ ${pinnedCount} pinned`] : []),
             `↓ ${unpinnedCount} unpinned`,
             `sorted by (${reprOptions.sortField})`,
             `order (${orderIcon})`,
-            `show (${foldStatus})`,
+            `show (${hideHistoryStatus})`,
         ];
 
         this.representation = delimiterInfo.join(' | ');
@@ -64,17 +64,17 @@ export class SectionDelimiter implements TreeItemInterface {
     }
 }
 
-export class FoldPlaceholder implements TreeItemInterface {
+export class HistoryPlaceholder implements TreeItemInterface {
     constructor() { }
 
     toTreeItem(): vscode.TreeItem {
-        const treeItem = new vscode.TreeItem('... history folded', vscode.TreeItemCollapsibleState.None);
+        const treeItem = new vscode.TreeItem('... history hidden', vscode.TreeItemCollapsibleState.None);
         treeItem.iconPath = new vscode.ThemeIcon('history');
         treeItem.command = {
-            command: 'navigationHistory.unfold',
-            title: 'unfold'
+            command: 'navigationHistory.showHistory',
+            title: 'Show History'
         };
-        treeItem.contextValue = 'foldPlaceholder';
+        treeItem.contextValue = 'historyPlaceholder';
         return treeItem;
     }
 }

@@ -4,6 +4,7 @@ import { Arrival } from './arrival';
 import { TracableSymbol } from './tracableSymbol';
 import { ArrivalCollection } from './arrivalCollection';
 
+
 // This recorder is responsible for recording the navigation history
 export class ArrivalRecorder {
     private latestArrival: Arrival | undefined = undefined;
@@ -42,7 +43,7 @@ export class ArrivalRecorder {
             function doesArrivalHasSameSymbol(symbol: TracableSymbol, arrival: Arrival) {
                 return arrival.symbol.isEqual(symbol);
             }
-            
+
             function isSymbolTheSameAsArrivalWhenEditing(symbol: TracableSymbol, arrival: Arrival) {
                 return arrival.symbol.hasSameStartPosition(symbol);
             }
@@ -50,7 +51,7 @@ export class ArrivalRecorder {
             // iterate through arrival collection from latest to oldest
             for (let i = this.arrivalCollection.length - 1; i >= 0; --i) {
                 const rootArrivalForSearching = this.arrivalCollection.at(i);
-                
+
                 const arrivalInTree: Arrival | undefined = this.findInArrivalTree(arrival.symbol, rootArrivalForSearching, doesArrivalHasSameSymbol);
 
                 // when move around in range of same symbol I've already arrived
@@ -78,7 +79,7 @@ export class ArrivalRecorder {
                     }
                     exitCodeBlock();
                 }
-                
+
                 // when drill into another method of same class
                 if (!this.latestArrival?.isOnSameSymbolOf(arrival)
                     && this.latestArrival?.word === arrival.symbol.name
@@ -141,7 +142,7 @@ export class ArrivalRecorder {
                 }
 
                 const arrivalInTreeBeforeEditing: Arrival | undefined = this.findInArrivalTree(arrival.symbol, rootArrivalForSearching, isSymbolTheSameAsArrivalWhenEditing);
-                
+
                 // special case: when we edit the symbol
                 if (arrivalInTreeBeforeEditing) {
                     // when we edit the symbol, the symbol under cursor will be slightly different from the symbol in the tree, but their start position should be the same.
@@ -152,7 +153,7 @@ export class ArrivalRecorder {
                     recordedArrival = arrivalInTreeBeforeEditing;
                     exitCodeBlock();
                 }
-                
+
                 // when move around, but symbol that contains arrival's symbol(including itself) has been already in the tree, thus append the arrival as a child of the old symbol
                 const ancestorArrivalInTree = this.findSymbolAncestorInArrivalTree(arrival.symbol, rootArrivalForSearching, doesArrivalHasSameSymbol);
                 if (ancestorArrivalInTree) {

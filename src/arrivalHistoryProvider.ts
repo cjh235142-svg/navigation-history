@@ -3,6 +3,7 @@ import { Arrival, TreeItemInterface } from './arrival';
 import { ArrivalCollection } from './arrivalCollection';
 import { toTreeItemCollection, TreeViewReprOptions } from './treeItemCollection';
 
+
 export class ArrivalHistoryProvider implements vscode.TreeDataProvider<TreeItemInterface> {
 	private _onDidChangeTreeData: vscode.EventEmitter<TreeItemInterface | undefined | null | void> = new vscode.EventEmitter<TreeItemInterface | undefined | null | void>();
 	readonly onDidChangeTreeData?: vscode.Event<void | TreeItemInterface | TreeItemInterface[] | null | undefined> | undefined = this._onDidChangeTreeData.event;
@@ -36,6 +37,12 @@ export class ArrivalHistoryProvider implements vscode.TreeDataProvider<TreeItemI
 
 	updateReprOptions(options: Partial<TreeViewReprOptions>) {
 		this.reprOptions = { ...this.reprOptions, ...options };
+		this.refresh();
+		return this;
+	}
+
+	toggleHistoryHiding() {
+		this.reprOptions.hideHistory = !this.reprOptions.hideHistory;
 		this.refresh();
 		return this;
 	}

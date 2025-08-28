@@ -2,7 +2,7 @@
   "name": "navigation-history",
   "displayName": "Navigation History",
   "description": "Enhance the experience of reading code by providing a comprehensive history of code navigation and a tree structure of calling hierarchies.",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "publisher": "WaylongLeon",
   "icon": "media/icon.png",
   "repository": {
@@ -16,7 +16,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onView:navigationHistory"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -59,15 +59,15 @@
           "default": "",
           "description": "the delimiter for each symbol tree in the view, only effective when enableDelimiter is true"
         },
-        "navigationHistory.folding.defaultFolding": {
+        "navigationHistory.history.hideHistory": {
           "type": "boolean",
           "default": true,
-          "description": "if true, the navigation history will only show limited number of symbols and fold the rest"
+          "description": "if true, the navigation history will only show limited number of symbols and hide the rest"
         },
-        "navigationHistory.folding.unpinnedItemFoldingThreshold": {
+        "navigationHistory.history.unpinnedItemHidingThreshold": {
           "type": "integer",
           "default": 20,
-          "description": "the threshold of the symbol's checked count to be folded"
+          "description": "only show this number symbols if you choose to hide history"
         },
         "navigationHistory.item.showFilenameInItemDescription": {
           "type": "boolean",
@@ -105,7 +105,7 @@
       {
         "command": "navigationHistory.cleanup",
         "title": "Cleanup",
-        "icon": "$(clear-all)"
+        "icon": "$(terminal-kill)"
       },
       {
         "command": "navigationHistory.delete",
@@ -114,7 +114,7 @@
       },
       {
         "command": "navigationHistory.deleteOtherTrees",
-        "title": "Delete Others",
+        "title": "Delete Other Trees",
         "icon": "$(trash)"
       },
       {
@@ -138,23 +138,39 @@
         "icon": "$(sort-precedence)"
       },
       {
-        "command": "navigationHistory.unfold",
-        "title": "Unfold",
-        "icon": "$(unfold)"
+        "command": "navigationHistory.showHistory",
+        "title": "Show History",
+        "icon": "$(public-ports-view-icon)"
       },
       {
-        "command": "navigationHistory.fold",
-        "title": "Fold",
-        "icon": "$(fold)"
+        "command": "navigationHistory.hideHistory",
+        "title": "Hide History",
+        "icon": "$(timeline-open)"
+      },
+      {
+        "command": "navigationHistory.toggleHistoryHiding",
+        "title": "Toggle History Hiding",
+        "icon": "$(notebook-kernel-select)"
       },
       {
         "command": "navigationHistory.unpinAll",
         "title": "Unpin All",
         "icon": "$(pinned)"
+      },
+      {
+        "command": "navigationHistory.togglePauseState",
+        "title": "Toggle Pause / Resume",
+        "icon": "$(breakpoints-activate)"
       }
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "navigationHistory.togglePauseState",
+          "when": "view == navigationHistory",
+          "group": "navigation",
+          "title": "Toggle Pause / Resume"
+        },
         {
           "command": "navigationHistory.cleanup",
           "when": "view == navigationHistory",
@@ -164,19 +180,17 @@
         {
           "command": "navigationHistory.switchSortOrder",
           "when": "view == navigationHistory",
-          "group": "navigation",
           "title": "Sort"
         },
         {
           "command": "navigationHistory.switchSortField",
           "when": "view == navigationHistory",
-          "group": "navigation",
           "title": "Sort Field"
         },
         {
-          "command": "navigationHistory.fold",
+          "command": "navigationHistory.toggleHistoryHiding",
           "when": "view == navigationHistory",
-          "title": "Fold"
+          "title": "Toggle History Hiding"
         },
         {
           "command": "navigationHistory.unpinAll",

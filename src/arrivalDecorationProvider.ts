@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { ArrivalCollection } from './arrivalCollection';
 
-type ColorReprOptions = {
+export type ColorReprOptions = {
     warmColorThreshold: number;
     hotColorThreshold: number;
     colorize: boolean;
+    emphasizePauseState: boolean;
 }
 
 export class ArrivalDecorationProvider implements vscode.FileDecorationProvider {
@@ -37,7 +38,7 @@ export class ArrivalDecorationProvider implements vscode.FileDecorationProvider 
         return {
             badge: `${visitingCount}`,
             tooltip: `${symbolName} has been checked for ${visitingCount} times ${excalmationMarks}`,
-            color: this.reprOptions.colorize ? this.color(arrival.selfEncoreCount) : undefined,
+            color: this.color(arrival.selfEncoreCount)
         };
     }
 
@@ -54,6 +55,16 @@ export class ArrivalDecorationProvider implements vscode.FileDecorationProvider 
     }
 
     private color(encoreCount: number): vscode.ThemeColor | undefined {
+        if (this.reprOptions.emphasizePauseState) {
+            return new vscode.ThemeColor('checkbox.disabled.background');
+        } else if (this.reprOptions.colorize) {
+            return this.encoreColor(encoreCount);
+        }
+
+        return undefined;
+    }
+
+    private encoreColor(encoreCount: number): vscode.ThemeColor | undefined {
         let colorScheme: [vscode.ThemeColor, number][] = [
             [new vscode.ThemeColor('testing.iconPassed'), this.reprOptions.warmColorThreshold],
             [new vscode.ThemeColor('errorForeground'), this.reprOptions.hotColorThreshold],

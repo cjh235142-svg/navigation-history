@@ -30,6 +30,11 @@ export async function extractSymbols(doc: vscode.TextDocument, position: vscode.
         'vscode.executeDocumentSymbolProvider',
         doc.uri
     );
+
+    if (!symbols) {
+        return null;
+    }
+
     const tracableSymbols: TracableSymbol[] = symbols.map(symbol => TracableSymbol.createFrom(doc.uri, symbol));
 
     return findSymbol(tracableSymbols, position);

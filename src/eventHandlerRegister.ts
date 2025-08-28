@@ -7,16 +7,38 @@ import { ArrivalDecorationProvider } from './arrivalDecorationProvider';
 import { ArrivalStatusBarItem } from './arrivalStatusBarItem';
 
 
-export function registerUpdatingHandler(
-    treeView: vscode.TreeView<TreeItemInterface | null | undefined>,
-    arrivalHistoryProvider: ArrivalHistoryProvider,
-    recorder: ArrivalRecorder,
-    decorationProvider: ArrivalDecorationProvider,
-    statusBarItem: ArrivalStatusBarItem,
-) {
+export class ViewUpdater {
+    private treeView: vscode.TreeView<TreeItemInterface | null | undefined>;
+    private recorder: ArrivalRecorder;
+    private arrivalHistoryProvider: ArrivalHistoryProvider;
+    private decorationProvider: ArrivalDecorationProvider;
+    private statusBarItem: ArrivalStatusBarItem;
+    private paused: boolean = false;
 
-    return vscode.window.onDidChangeTextEditorSelection(async (event) => {
-        if (!event) {
+    constructor(
+        treeView: vscode.TreeView<TreeItemInterface | null | undefined>,
+        recorder: ArrivalRecorder,
+        arrivalHistoryProvider: ArrivalHistoryProvider,
+        decorationProvider: ArrivalDecorationProvider,
+        statusBarItem: ArrivalStatusBarItem,
+    ) {
+        this.treeView = treeView;
+        this.recorder = recorder;
+        this.arrivalHistoryProvider = arrivalHistoryProvider;
+        this.decorationProvider = decorationProvider;
+        this.statusBarItem = statusBarItem;
+    }
+
+    togglePauseState() {
+        this.paused = !this.paused;
+    }
+
+    get pausedState(): boolean {
+        return this.paused;
+    }
+
+    private async eventHandler(event: vscode.TextEditorSelectionChangeEvent) {
+        if (!event || this.paused) {
             return;
         }
 
@@ -25,19 +47,22 @@ export function registerUpdatingHandler(
             return;
         }
 
-        const savedArrival = recorder.record(arrival);
+        const savedArrival = this.recorder.record(arrival);
 
-        arrivalHistoryProvider.refresh();
-        decorationProvider.refresh();
-        statusBarItem.refresh();
+        this.arrivalHistoryProvider.refresh();
+        this.decorationProvider.refresh();
+        this.statusBarItem.refresh();
 
-        if (treeView.visible) {
+        if (this.treeView.visible) {
             // treeView.reveal is a way to show a selected status, do auto-focusing and auto-expanding
-            // if the treeView is not visible(folded), we should stop doing revealing, since it will expand the folded view automatically
-            treeView.reveal(savedArrival, { select: true, focus: false, expand: true });
+            // if the treeView is not visible(hidden), we should stop doing revealing, since it will expand the hidden view automatically
+            this.treeView.reveal(savedArrival, { select: true, focus: false, expand: true });
         }
+    }
 
-    });
+    registerSelf() {
+        return vscode.window.onDidChangeTextEditorSelection(this.eventHandler.bind(this));
+    }
 }
 
 
@@ -91,16 +116,16 @@ export function registerConfigChangeHandler(
                 sortOrder: sortOrder as SortOrder
             });
 
-        } else if (event.affectsConfiguration('navigationHistory.folding.defaultFolding')) {
-            const isFolded = vscode.workspace.getConfiguration('navigationHistory.folding').get('defaultFolding');
+        } else if (event.affectsConfiguration('navigationHistory.history.hideHistory')) {
+            const isHiding = vscode.workspace.getConfiguration('navigationHistory.history').get('hideHistory');
             arrivalHistoryProvider.updateReprOptions({
-                isFolded: isFolded as boolean
+                hideHistory: isHiding as boolean
             });
 
-        } else if (event.affectsConfiguration('navigationHistory.folding.unpinnedItemFoldingThreshold')) {
-            const unpinFoldThreshold = vscode.workspace.getConfiguration('navigationHistory.folding').get('unpinnedItemFoldingThreshold');
+        } else if (event.affectsConfiguration('navigationHistory.history.unpinnedItemHidingThreshold')) {
+            const unpinHideThreshold = vscode.workspace.getConfiguration('navigationHistory.history').get('unpinnedItemHidingThreshold');
             arrivalHistoryProvider.updateReprOptions({
-                unpinFoldThreshold: unpinFoldThreshold as number
+                unpinHideThreshold: unpinHideThreshold as number
             });
 
         } else if (event.affectsConfiguration('navigationHistory.color.enableColorizing')) {

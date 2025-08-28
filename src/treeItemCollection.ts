@@ -1,6 +1,6 @@
 import {
     ArrivalReprOptions,
-    FoldPlaceholder,
+    HistoryPlaceholder,
     SectionDelimiter,
     SectionDelimiterReprOptions,
     SortField,
@@ -15,6 +15,7 @@ export type delimiterReprOptions = {
     delimiterString: string,
     enableDelimiter: boolean,
 };
+
 export type TreeViewReprOptions = delimiterReprOptions & SectionDelimiterReprOptions & ArrivalReprOptions;
 
 export function toTreeItemCollection(arrivalCollection: ArrivalCollection, reprOptions: TreeViewReprOptions): TreeItemInterface[] {
@@ -51,22 +52,22 @@ export function toTreeItemCollection(arrivalCollection: ArrivalCollection, reprO
     arrivalCollection.setReprOptions(reprOptions);
     const pinnedArrivals = sortArrivals(arrivalCollection.pinnedArrivals(), reprOptions.sortOrder, reprOptions.sortField);
     const unpinnedArrivals = sortArrivals(arrivalCollection.unpinnedArrivals(), reprOptions.sortOrder, reprOptions.sortField);
-    const shortenUnpinnedArrivals = reprOptions.isFolded ? unpinnedArrivals.slice(0, reprOptions.unpinFoldThreshold) : unpinnedArrivals;
-    let foldedUnpinnedArrivals: TreeItemInterface[];
-    if (unpinnedArrivals.length > reprOptions.unpinFoldThreshold && reprOptions.isFolded) {
+    const shortenUnpinnedArrivals = reprOptions.hideHistory ? unpinnedArrivals.slice(0, reprOptions.unpinHideThreshold) : unpinnedArrivals;
+    let hiddenUnpinnedArrivals: TreeItemInterface[];
+    if (unpinnedArrivals.length > reprOptions.unpinHideThreshold && reprOptions.hideHistory) {
         if (reprOptions.sortOrder === 'ascending') {
-            foldedUnpinnedArrivals = [new FoldPlaceholder(), ...shortenUnpinnedArrivals];
+            hiddenUnpinnedArrivals = [new HistoryPlaceholder(), ...shortenUnpinnedArrivals];
         } else {
-            foldedUnpinnedArrivals = [...shortenUnpinnedArrivals, new FoldPlaceholder()];
+            hiddenUnpinnedArrivals = [...shortenUnpinnedArrivals, new HistoryPlaceholder()];
         }
     } else {
-        foldedUnpinnedArrivals = unpinnedArrivals;
+        hiddenUnpinnedArrivals = unpinnedArrivals;
     }
 
     const sectionDelimiter = new SectionDelimiter(pinnedArrivals.length, unpinnedArrivals.length, reprOptions);
 
     const pinned = reprOptions.enableDelimiter ? addDelimiter(pinnedArrivals, reprOptions.delimiterString) : pinnedArrivals;
-    const unpinned = reprOptions.enableDelimiter ? addDelimiter(foldedUnpinnedArrivals, reprOptions.delimiterString) : foldedUnpinnedArrivals;
+    const unpinned = reprOptions.enableDelimiter ? addDelimiter(hiddenUnpinnedArrivals, reprOptions.delimiterString) : hiddenUnpinnedArrivals;
 
     return [...pinned, sectionDelimiter, ...unpinned];
 

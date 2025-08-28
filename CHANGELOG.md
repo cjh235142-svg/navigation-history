@@ -4,6 +4,14 @@ All notable changes to the "navigation-history" extension will be documented in 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.1.0] - 2025-08-28
+
+- Efficiency improvement. change the extension to activate only after user opening the view panel instead of starting after vscode launched. This will prevent running this extension when user has no intention to read code. 
+- Add toggle button for recording and pausing so that you can pause recording as you wish.
+- Change confusing naming like "fold" / "unfold" to "hide history" and "show history".
+- Improve the UX. 
+- Fix bugs.
+
 ## [1.0.6] - 2025-07-15
 
 - fix bug of 'fsPath error' and fail functioning on vscode 1.102.0+.
